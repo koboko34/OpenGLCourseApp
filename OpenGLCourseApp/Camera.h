@@ -20,6 +20,8 @@ public:
 
 	glm::mat4 CalculateViewMatrix();
 
+	glm::vec3 GetCameraPosition() const { return position; }
+
 private:
 
 	glm::vec3 position;
