@@ -7,6 +7,11 @@
 
 #include <GL/glew.h>
 
+#include "DirectionalLight.h"
+#include "PointLight.h"
+
+#include "CommonValues.h"
+
 class Shader
 {
 public:
@@ -21,24 +26,49 @@ public:
 	GLuint GetModelLocation() const { return uniformModel; }
 	GLuint GetViewLocation() const { return uniformView; }
 	GLuint GetEyePositionLocation() const { return uniformEyePosition; }
-	GLuint GetAmbientColourLocation() const { return uniformAmbientColour; }
-	GLuint GetAmbientIntensityLocation() const { return uniformAmbientIntensity; }
-	GLuint GetDirectionLocation() const { return uniformDirection; }
-	GLuint GetDiffuseIntensityLocation() const { return uniformDiffuseIntensity; }
+	GLuint GetAmbientColourLocation() const { return uniformDirectionalLight.uniformColour; }
+	GLuint GetAmbientIntensityLocation() const { return uniformDirectionalLight.uniformAmbientIntensity; }
+	GLuint GetDirectionLocation() const { return uniformDirectionalLight.uniformDirection; }
+	GLuint GetDiffuseIntensityLocation() const { return uniformDirectionalLight.uniformDiffuseIntensity; }
 	GLuint GetShininessLocation() const { return uniformShininess; }
 	GLuint GetSpecularIntensityLocation() const { return uniformSpecularIntensity; }
+
+	void SetDirectionalLight(DirectionalLight* directionalLight);
+	void SetPointLights(PointLight* pointLights, unsigned int lightCount);
 
 	void UseShader();
 	void ClearShader();
 
 private:
 
+	int pointLightCount;
+
 	GLuint shaderID, uniformProjection, uniformModel, uniformView, uniformEyePosition,
-		   uniformAmbientColour, uniformAmbientIntensity, uniformDirection, uniformDiffuseIntensity,
 		   uniformShininess, uniformSpecularIntensity;
 
-	void CompileShaders(const char* vertexCode, const char* fragmentCode);
+	void CompileShader(const char* vertexCode, const char* fragmentCode);
 	void AddShader(GLuint theProgram, const char* shaderCode, GLenum shaderType);
+
+	struct {
+		GLuint uniformColour;
+		GLuint uniformAmbientIntensity;
+		GLuint uniformDiffuseIntensity;
+
+		GLuint uniformDirection;
+	} uniformDirectionalLight;
+
+	GLuint uniformPointLightCount;
+
+	struct {
+		GLuint uniformColour;
+		GLuint uniformAmbientIntensity;
+		GLuint uniformDiffuseIntensity;
+
+		GLuint uniformPosition;
+		GLuint uniformConstant;
+		GLuint uniformLinear;
+		GLuint uniformExponent;
+	} uniformPointLight[MAX_POINT_LIGHTS];
 
 	std::string ReadFile(const char* fileLocation);
 };
