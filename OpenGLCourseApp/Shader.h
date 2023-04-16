@@ -9,6 +9,7 @@
 
 #include "DirectionalLight.h"
 #include "PointLight.h"
+#include "SpotLight.h"
 
 #include "CommonValues.h"
 
@@ -35,6 +36,7 @@ public:
 
 	void SetDirectionalLight(DirectionalLight* directionalLight);
 	void SetPointLights(PointLight* pointLights, unsigned int lightCount);
+	void SetSpotLights(SpotLight* spotLights, unsigned int lightCount);
 
 	void UseShader();
 	void ClearShader();
@@ -42,6 +44,7 @@ public:
 private:
 
 	int pointLightCount;
+	int spotLightCount;
 
 	GLuint shaderID, uniformProjection, uniformModel, uniformView, uniformEyePosition,
 		   uniformShininess, uniformSpecularIntensity;
@@ -69,6 +72,22 @@ private:
 		GLuint uniformLinear;
 		GLuint uniformExponent;
 	} uniformPointLight[MAX_POINT_LIGHTS];
+
+	GLuint uniformSpotLightCount;
+
+	struct {
+		GLuint uniformColour;
+		GLuint uniformAmbientIntensity;
+		GLuint uniformDiffuseIntensity;
+
+		GLuint uniformPosition;
+		GLuint uniformConstant;
+		GLuint uniformLinear;
+		GLuint uniformExponent;
+
+		GLuint uniformDirection;
+		GLuint uniformEdge;
+	} uniformSpotLight[MAX_SPOT_LIGHTS];
 
 	std::string ReadFile(const char* fileLocation);
 };

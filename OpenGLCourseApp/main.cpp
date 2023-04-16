@@ -21,6 +21,7 @@
 #include "Texture.h"
 #include "DirectionalLight.h"
 #include "PointLight.h"
+#include "SpotLight.h"
 #include "Material.h"
 
 const float toRadians = 3.14159265f / 180.f;
@@ -38,6 +39,7 @@ Texture floorTexture;
 
 DirectionalLight mainLight;
 PointLight pointLights[MAX_POINT_LIGHTS];
+SpotLight spotLights[MAX_SPOT_LIGHTS];
 
 Material shinyMaterial;
 Material dullMaterial;
@@ -135,21 +137,47 @@ int main()
 	floorTexture.LoadTexture();
 
 	mainLight = DirectionalLight(1.f, 1.f, 1.f,
-								0.1f, 0.2f,
+								0.1f, 0.1f,
 								0.f, 0.f, -1.f);
 
 	unsigned int pointLightCount = 0;
 
 	pointLights[0] = PointLight(0.f, 0.f, 1.f,
-								0.1f, 1.0f,
+								0.1f, 0.1f,
 								4.f, 2.f, 0.f,
 								0.3f, 0.2f, 0.1f);
-	pointLightCount++;
+	//pointLightCount++;
 	pointLights[1] = PointLight(0.f, 1.f, 0.f,
-								0.1f, 1.0f,
+								0.1f, 0.1f,
 								-4.f, 1.f, 0.f,
 								0.3f, 0.2f, 0.1f);
-	pointLightCount++;
+	//pointLightCount++;
+
+	unsigned int spotLightCount = 0;
+
+	spotLights[0] = SpotLight(1.f, 1.f, 1.f,
+							  0.1, 1.f,
+							  0.f, 0.f, 0.f,
+							  0.f, -1.f, 0.f,
+							  1.f, 0.0f, 0.0f,
+							  20.f);
+	spotLightCount++;
+
+	spotLights[1] = SpotLight(1.f, 1.f, 1.f,
+							  0.1, 1.f,
+							  0.f, -1.5f, 0.f,
+							  -100.f, -1.f, 0.f,
+							  1.f, 0.f, 0.f,
+							  20.f);
+	spotLightCount++;
+
+	spotLights[2] = SpotLight(1.f, 1.f, 1.f,
+							  0.1, 2.f,
+						  	  0.f, -1.5f, 0.f,
+							  -100.f, -1.f, 0.f,
+							  1.f, 0.02f, 0.01f,
+							  20.f);
+	spotLightCount++;
 
 	shinyMaterial = Material(2.f, 64);
 	dullMaterial = Material(0.3f, 4);
@@ -188,8 +216,13 @@ int main()
 		uniformShininess = shaderList[0].GetShininessLocation();
 		uniformSpecularIntensity = shaderList[0].GetSpecularIntensityLocation();
 
+		glm::vec3 lowerLight = camera.GetCameraPosition();
+		lowerLight.y -= 0.3f;
+		spotLights[2].SetFlash(lowerLight, camera.GetCameraDirection());
+
 		shaderList[0].SetDirectionalLight(&mainLight);
 		shaderList[0].SetPointLights(pointLights, pointLightCount);
+		shaderList[0].SetSpotLights(spotLights, spotLightCount);
 
 		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
 		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.CalculateViewMatrix()));
@@ -213,7 +246,7 @@ int main()
 		model = glm::mat4(1.f);
 		model = glm::translate(model, glm::vec3(0.f, -2.f, 0.f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		floorTexture.UseTexture();
+		dirtTexture.UseTexture();
 		shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		meshList[2]->RenderMesh();
 
