@@ -24,6 +24,8 @@
 #include "SpotLight.h"
 #include "Material.h"
 
+#include "Model.h"
+
 const float toRadians = 3.14159265f / 180.f;
 
 std::vector<Mesh*> meshList;
@@ -43,6 +45,9 @@ SpotLight spotLights[MAX_SPOT_LIGHTS];
 
 Material shinyMaterial;
 Material dullMaterial;
+
+Model xwing;
+Model blackhawk;
 
 GLfloat deltaTime = 0.f;
 GLfloat lastTime = 0.f;
@@ -130,14 +135,14 @@ int main()
 	camera = Camera(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f), -90.f, 0.f, 5.f, 0.2f);
 
 	brickTexture = Texture((char*)"Textures/brick.png");
-	brickTexture.LoadTexture();
+	brickTexture.LoadTextureA();
 	dirtTexture = Texture((char*)"Textures/dirt.png");
-	dirtTexture.LoadTexture();
+	dirtTexture.LoadTextureA();
 	floorTexture = Texture((char*)"Textures/plain.png");
-	floorTexture.LoadTexture();
+	floorTexture.LoadTextureA();
 
 	mainLight = DirectionalLight(1.f, 1.f, 1.f,
-								0.1f, 0.1f,
+								0.3f, 0.6f,
 								0.f, 0.f, -1.f);
 
 	unsigned int pointLightCount = 0;
@@ -146,12 +151,12 @@ int main()
 								0.1f, 0.1f,
 								4.f, 2.f, 0.f,
 								0.3f, 0.2f, 0.1f);
-	//pointLightCount++;
+	pointLightCount++;
 	pointLights[1] = PointLight(0.f, 1.f, 0.f,
 								0.1f, 0.1f,
 								-4.f, 1.f, 0.f,
 								0.3f, 0.2f, 0.1f);
-	//pointLightCount++;
+	pointLightCount++;
 
 	unsigned int spotLightCount = 0;
 
@@ -181,6 +186,11 @@ int main()
 
 	shinyMaterial = Material(2.f, 64);
 	dullMaterial = Material(0.3f, 4);
+
+	xwing = Model();
+	xwing.LoadModel("Models/x-wing.obj");
+	blackhawk = Model();
+	blackhawk.LoadModel("Models/uh60.obj");
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -218,7 +228,7 @@ int main()
 
 		glm::vec3 lowerLight = camera.GetCameraPosition();
 		lowerLight.y -= 0.3f;
-		spotLights[2].SetFlash(lowerLight, camera.GetCameraDirection());
+		//spotLights[2].SetFlash(lowerLight, camera.GetCameraDirection());
 
 		shaderList[0].SetDirectionalLight(&mainLight);
 		shaderList[0].SetPointLights(pointLights, pointLightCount);
@@ -249,6 +259,21 @@ int main()
 		dirtTexture.UseTexture();
 		shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		meshList[2]->RenderMesh();
+
+		model = glm::mat4(1.f);
+		model = glm::translate(model, glm::vec3(-15.f, -1.0f, 5.f));
+		model = glm::scale(model, glm::vec3(0.006f, 0.006f, 0.006f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
+		xwing.RenderModel();
+
+		model = glm::mat4(1.f);
+		model = glm::rotate(model, -90.f * toRadians, glm::vec3(1.f, 0.f, 0.f));
+		model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
+		model = glm::translate(model, glm::vec3(10.f, -10.0f, 0.f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
+		blackhawk.RenderModel();
 
 		glUseProgram(0);
 
