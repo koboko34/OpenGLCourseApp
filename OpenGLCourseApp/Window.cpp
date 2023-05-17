@@ -83,6 +83,8 @@ int Window::Initialise()
 		return 1;
 	}
 
+	glEnable(GL_DEPTH_TEST);
+
 	// setup viewport size
 	glViewport(0, 0, bufferWidth, bufferHeight);
 

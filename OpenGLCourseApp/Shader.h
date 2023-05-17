@@ -7,6 +7,10 @@
 
 #include <GL/glew.h>
 
+#include <glm\glm.hpp>
+#include <glm\gtc\matrix_transform.hpp>
+#include <glm\gtc\type_ptr.hpp>
+
 #include "DirectionalLight.h"
 #include "PointLight.h"
 #include "SpotLight.h"
@@ -38,6 +42,10 @@ public:
 	void SetPointLights(PointLight* pointLights, unsigned int lightCount);
 	void SetSpotLights(SpotLight* spotLights, unsigned int lightCount);
 
+	void SetTexture(GLuint textureUnit);
+	void SetDirectionalShadowMap(GLuint textureUnit);
+	void SetDirectionalLightTransform(glm::mat4* lTransform);
+
 	void UseShader();
 	void ClearShader();
 
@@ -47,7 +55,9 @@ private:
 	int spotLightCount;
 
 	GLuint shaderID, uniformProjection, uniformModel, uniformView, uniformEyePosition,
-		   uniformShininess, uniformSpecularIntensity;
+		uniformSpecularIntensity, uniformShininess,
+		uniformTexture, uniformDirectionalShadowMap,
+		uniformDirectionalLightTransform;
 
 	void CompileShader(const char* vertexCode, const char* fragmentCode);
 	void AddShader(GLuint theProgram, const char* shaderCode, GLenum shaderType);
