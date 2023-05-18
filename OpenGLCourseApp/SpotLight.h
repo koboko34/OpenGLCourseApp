@@ -7,7 +7,9 @@ class SpotLight : public PointLight
 public:
 
 	SpotLight();
-	SpotLight(GLfloat red, GLfloat green, GLfloat blue,
+	SpotLight(GLuint shadowWidth, GLuint shadowHeight,
+		GLfloat near, GLfloat far,
+		GLfloat red, GLfloat green, GLfloat blue,
 		GLfloat ambientStrength, GLfloat diffuseStrength,
 		GLfloat xPos, GLfloat yPos, GLfloat zPos,
 		GLfloat xDir, GLfloat yDir, GLfloat zDir,
@@ -22,12 +24,15 @@ public:
 		GLuint edgeLocation);
 
 	void SetFlash(glm::vec3 pos, glm::vec3 dir);
+	void Toggle() { isOn = !isOn; }
 
 private:
 
 	glm::vec3 direction;
 
 	GLfloat edge, procEdge;
+
+	bool isOn;
 
 };
 
