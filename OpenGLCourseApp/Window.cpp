@@ -54,7 +54,7 @@ int Window::Initialise()
 	// allow forward compatibility
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-	mainWindow = glfwCreateWindow(width, height, "Test window", NULL, NULL);
+	mainWindow = glfwCreateWindow(width, height, "Test window", glfwGetPrimaryMonitor(), NULL);
 	if (!mainWindow)
 	{
 		printf("Window creation failed!");

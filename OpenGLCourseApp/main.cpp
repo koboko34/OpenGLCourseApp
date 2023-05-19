@@ -26,6 +26,8 @@
 
 #include "Model.h"
 
+#include "Skybox.h"
+
 const float toRadians = 3.14159265f / 180.f;
 
 GLuint uniformModel = 0, uniformProjection = 0, uniformView = 0, uniformEyePosition = 0,
@@ -50,6 +52,8 @@ PointLight pointLights[MAX_POINT_LIGHTS];
 SpotLight spotLights[MAX_SPOT_LIGHTS];
 unsigned int pointLightCount = 0;
 unsigned int spotLightCount = 0;
+
+Skybox skybox;
 
 Material shinyMaterial;
 Material dullMaterial;
@@ -157,11 +161,12 @@ void RenderScene()
 	dullMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
 	meshList[1]->RenderMesh();
 
+	// floor
 	model = glm::mat4(1.f);
 	model = glm::translate(model, glm::vec3(0.f, -2.f, 0.f));
 	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 	dirtTexture.UseTexture();
-	dullMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
+	shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
 	meshList[2]->RenderMesh();
 
 	model = glm::mat4(1.f);
@@ -248,18 +253,21 @@ void HandleOmniShadows()
 
 void RenderPass(glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
 {
+	glViewport(0, 0, 1920, 1080);
+
+	glClearColor(0.f, 0.f, 0.f, 1.f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	skybox.DrawSkybox(viewMatrix, projectionMatrix);
+	
 	shaderList[0].UseShader();
+
 	uniformProjection = shaderList[0].GetProjectionLocation();
 	uniformModel = shaderList[0].GetModelLocation();
 	uniformView = shaderList[0].GetViewLocation();
 	uniformEyePosition = shaderList[0].GetEyePositionLocation();
 	uniformShininess = shaderList[0].GetShininessLocation();
 	uniformSpecularIntensity = shaderList[0].GetSpecularIntensityLocation();
-
-	glViewport(0, 0, 1366, 768);
-
-	glClearColor(0.f, 0.f, 0.f, 1.f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 	glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.CalculateViewMatrix()));
@@ -286,7 +294,7 @@ void RenderPass(glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
 
 int main()
 {
-	mainWindow = Window(1280, 720);
+	mainWindow = Window(1920, 1080);
 	mainWindow.Initialise();
 
 	camera = Camera(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f), -90.f, 0.f, 12.f, 0.2f);
@@ -299,9 +307,9 @@ int main()
 	floorTexture.LoadTextureA();
 
 	mainLight = DirectionalLight(4096, 4096,
-								1.f, 1.f, 1.f,
-								0.0f, 0.0f,
-								0.f, -15.f, -10.f);
+								1.f, 0.5f, 0.1f,
+								0.3f, 0.8f,
+								-10.f, -12.f, 21.f);
 
 	pointLights[0] = PointLight(1024, 1024,
 								0.01f, 100.f,
@@ -309,7 +317,7 @@ int main()
 								0.0f, 0.f,
 								4.f, 2.f, 0.f,
 								0.3f, 0.02f, 0.01f);
-	pointLightCount++;
+	//pointLightCount++;
 
 	pointLights[1] = PointLight(1024, 1024,
 								0.01f, 100.f,
@@ -317,7 +325,7 @@ int main()
 								0.f, 0.f,
 								-4.f, 2.f, 0.f,
 								0.3f, 0.02f, 0.01f);
-	pointLightCount++;
+	//pointLightCount++;
 
 	spotLights[0] = SpotLight(1024, 1024,
 								0.01f, 100.f,
@@ -327,7 +335,7 @@ int main()
 								-100.f, -1.f, 0.f,
 								1.f, 0.02f, 0.01f,
 								20.f);
-	spotLightCount++;
+	//spotLightCount++;
 
 	
 	spotLights[1] = SpotLight(1024, 1024,
@@ -338,7 +346,7 @@ int main()
 								-100.f, -1.f, 0.f,
 								1.f, 0.f, 0.f,
 								20.f);
-	spotLightCount++;
+	//spotLightCount++;
 
 	/*
 	spotLights[2] = SpotLight(1024, 1024,
@@ -351,6 +359,16 @@ int main()
 								20.f);
 	spotLightCount++;
 	*/
+
+	std::vector<std::string> skyboxFaces;
+	skyboxFaces.push_back("Textures/Skybox/cupertin-lake_rt.tga");
+	skyboxFaces.push_back("Textures/Skybox/cupertin-lake_lf.tga");
+	skyboxFaces.push_back("Textures/Skybox/cupertin-lake_up.tga");
+	skyboxFaces.push_back("Textures/Skybox/cupertin-lake_dn.tga");
+	skyboxFaces.push_back("Textures/Skybox/cupertin-lake_bk.tga");
+	skyboxFaces.push_back("Textures/Skybox/cupertin-lake_ft.tga");
+
+	skybox = Skybox(skyboxFaces);
 
 	shinyMaterial = Material(4.f, 128);
 	dullMaterial = Material(0.3f, 4);
